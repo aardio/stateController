@@ -1,0 +1,13 @@
+{
+    "include": [ "src"],
+    "exclude": ["node_modules"],
+    "compilerOptions": {
+      "target": "ES5",
+      "module": "ES2015",
+      "jsx": "react",
+      "declaration": true,
+      "declarationMap": true,
+      "strict": true,
+      "esModuleInterop": true
+    }
+  }

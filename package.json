@@ -1,0 +1,36 @@
+{
+  "name": "state-controller",
+  "version": "1.0.9", 
+  "description": "State management with React Hooks",
+  "source": "src/state-controller.tsx",
+  "main": "dist/state-controller.js",
+  "module": "dist/state-controller.mjs",
+  "unpkg": "dist/state-controller.umd.js",
+  "types": "dist/state-controller.d.ts",
+  "amdName": "stateController",
+  "files": [
+    "package.json",
+    "src",
+    "dist"
+  ],
+  "author": "aardio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aardio/stateController.git"
+  },
+  "keywords": ["stateController"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "microbundle --external react --globals react=React --strict --no-compress"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "microbundle": "^0.11.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.6.2"
+  }
+}
