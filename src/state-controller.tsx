@@ -1,12 +1,12 @@
-import React from "react"
+import React  from "react"
 
-function create<D,C,P>( useStore: (props: P)=> readonly [D,C],displayName?:string ) {
-	let Context = React.createContext< ( readonly [D,C] ) | null>(null);
-	const Provider: React.FC<P> = p =>  (<Context.Provider value={ useStore(p)  }>{p.children}</Context.Provider>);
+function create<P,R>( useValue: (props: P)=> R,displayName?:string ) {
+	let Context = React.createContext<R|null>(null);
+	const Provider: React.FC<P> = (p:React.PropsWithChildren<P>) =>  (<Context.Provider value={ useValue(p)  }>{p.children}</Context.Provider>);
 
 	const useStateController = () => {
 		let v = React.useContext(Context)
-		if ( Array.isArray(v) && v.length === 2 ) { return v as [typeof v[0],typeof v[1]] };  
+		if ( v ) { return v as R };  
 		throw new Error(`Missing <${useStateController.displayName}.Provider>`)
 	}
 
@@ -15,11 +15,43 @@ function create<D,C,P>( useStore: (props: P)=> readonly [D,C],displayName?:strin
 	return useStateController;
 }
 
-
 const combine = ( ...args:Array<{Provider:React.FunctionComponent}> ) :{Provider:React.FC<{}>} => ({
-	Provider:(props) =>  ( 
+	Provider:(props:React.PropsWithChildren<{}>) =>  ( 
 		<>{args.map( item=>item.Provider).reduceRight((prev, Next) => ( <Next>{ prev }</Next>), props.children) }</>
 	)
 });
 
-export default {create,combine}
+function useIfMounted() {
+	const [loading,setLoading] = React.useState(0);
+	const refMounted = React.useRef(true);
+	React.useEffect(() => () => {refMounted.current = false;},[]);
+
+	function ifMounted() : boolean   
+	function ifMounted<T>( v: (Promise<T> | (() => Promise<T>)) | T ) : Promise<T> 
+	function ifMounted<T>( v?: (Promise<T> | (() => Promise<T>)) | T ) : boolean | Promise<T>  {
+		if( v === undefined){
+			return refMounted.current;
+		}
+		else{
+			let p:Promise<T> = v as Promise<T>;
+			if (typeof v === "function") {p = (v as any)();}
+			if (!( p && (typeof p === "object") && "then" in p)) {p = Promise.resolve(p) as Promise<T>;}
+
+			setLoading((prev:number)=>prev+1);
+			return p.then(r => {
+				// eslint-disable-next-line
+				if(!refMounted.current) {throw null;}
+				setLoading((prev:number)=>prev-1);
+				return r;
+			}).catch( e => {
+				if(refMounted.current){ setLoading((prev:number)=>prev-1);}
+				throw e;
+			})
+		}
+	};
+
+	return [React.useCallback(ifMounted,[]),!!loading] as [typeof ifMounted,boolean];
+}
+
+const stateController = {create,combine,useIfMounted}
+export {stateController as default,create,combine,useIfMounted}

@@ -1,6 +1,6 @@
 {
   "name": "state-controller",
-  "version": "1.0.9", 
+  "version": "1.3.2", 
   "description": "State management with React Hooks",
   "source": "src/state-controller.tsx",
   "main": "dist/state-controller.js",

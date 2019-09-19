@@ -23,29 +23,43 @@ yarn add state-controller
 
 ```js
 import { useState } from "react"
-import stateController from "state-controller" 
+import stateController,{useIfMounted} from "state-controller" 
 import useUserController from "./useUserController"
  
-let useCounterStore = ({n=0}) => {
- 
-    let [counter, setCounter] = useState({
-        value: n,
-    })
+let useValue = ({n=0}) => {
 
-    let [ ,userController] = useUserController()
- 
-    let controller = {
+    const [counter, setCounter] = useState({value: n })
+    const [,userController] = useUserController()
+    const [ifMounted,loading] = useIfMounted();
+
+    const controller = {
         
         increment(n: number){
             setCounter({ ...counter, value: counter.value + n })
             userController.setLastActiveTime( new Date() )
+        },
+
+        update(){
+
+            ifMounted(
+              async ()=>{
+                  return {value:2}
+              }
+            ).then( setCounter ).catch( e => e && console.error(e) )
+
+
+            ifMounted({value:2}).then( setCounter )
+
+            if( ifMounted() ){
+              setCounter({value:2})
+            }
         }
     }
  
-    return [counter,controller] as const;
+    return [counter,controller,loading] as const;
 }
 
-let useCounterController = stateController.create(useCounterStore)
+let useCounterController = stateController.create(useValue)
 export default useCounterController
 ```
 
@@ -55,14 +69,14 @@ export default useCounterController
 import { useState, useMemo } from "react"
 import stateController from "state-controller" 
  
-let useUserStore = ({n=0}) => {
+const useValue = () => {
  
-    let [user, setUser] = useState({
+    const [user, setUser] = useState({
         name: "", 
         lastActiveTime: new Date()
     }) 
  
-    let controller = useMemo( ()=>({ 
+    const controller = useMemo( ()=>({ 
         setName(n: string){
             setUser( user=>({ ...user, name: n }) )
         }, 
@@ -74,7 +88,7 @@ let useUserStore = ({n=0}) => {
     return [user,controller] as const;
 }
 
-let useUserController = stateController.create(useUserStore)
+let useUserController = stateController.create(useValue)
 export default useUserController
 ```
 
@@ -86,10 +100,10 @@ import React, { useEffect } from "react"
 import useCounterController from "./store/useCounterController"
 import useUserController from "./store/useUserController"
 
-let Counter:React.FC<{}> = () =>  {
+const Counter:React.FC<{}> = () =>  {
  
-  let [counter,counterController] = useCounterController()
-  let [user,userController] = useUserController()
+  const [counter,counterController] = useCounterController()
+  const [user,userController] = useUserController()
 
   useEffect(
      ()=>{

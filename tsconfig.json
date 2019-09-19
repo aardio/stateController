@@ -2,8 +2,9 @@
     "include": [ "src"],
     "exclude": ["node_modules"],
     "compilerOptions": {
-      "target": "ES5",
+      "target": "ES2015",
       "module": "ES2015",
+      "allowSyntheticDefaultImports": true,
       "jsx": "react",
       "declaration": true,
       "declarationMap": true,
