@@ -15,7 +15,7 @@ function create<P,R>( useValue: (props: P)=> R,displayName?:string ) {
 	return useStateController;
 }
 
-const combine = ( ...args:Array<{Provider:React.FunctionComponent}> ) :{Provider:React.FC<{}>} => ({
+const combine = ( ...args:Array<{Provider:React.FunctionComponent<any>}> ) :{Provider:React.FC<any>} => ({
 	Provider:(props:React.PropsWithChildren<{}>) =>  ( 
 		<>{args.map( item=>item.Provider).reduceRight((prev, Next) => ( <Next>{ prev }</Next>), props.children) }</>
 	)
